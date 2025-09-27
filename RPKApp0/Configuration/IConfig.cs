@@ -1,4 +1,4 @@
-﻿namespace RPKApp0;
+﻿namespace RPKApp0.Configuration;
 
 public interface IConfig
 {

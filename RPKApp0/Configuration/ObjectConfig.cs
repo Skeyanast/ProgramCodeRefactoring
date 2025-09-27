@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace RPKApp0;
+namespace RPKApp0.Configuration;
 
 public class ObjectConfig : IConfig
 {

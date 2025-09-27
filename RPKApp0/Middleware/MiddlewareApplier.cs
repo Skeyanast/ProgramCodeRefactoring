@@ -1,4 +1,6 @@
-﻿namespace RPKApp0;
+﻿using RPKApp0.Infrastructure;
+
+namespace RPKApp0.Middleware;
 
 public static class MiddlewareApplier
 {

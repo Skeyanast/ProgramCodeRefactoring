@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace RPKApp0;
+namespace RPKApp0.Configuration;
 
 public class FileConfig : IConfig
 {

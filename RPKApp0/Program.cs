@@ -1,4 +1,9 @@
-﻿namespace RPKApp0;
+﻿using RPKApp0.Configuration;
+using RPKApp0.Infrastructure;
+using RPKApp0.Logging;
+using RPKApp0.Middleware;
+
+namespace RPKApp0;
 
 public static class Program
 {
@@ -15,7 +20,6 @@ public static class Program
         MiddlewareApplier.ApplyMiddleware(server);
 
         StartServerInBackground(server);
-        TestServerConnection(config);
         WaitForUserInput(server);
     }
 
@@ -27,12 +31,6 @@ public static class Program
         };
         serverThread.Start();
         Thread.Sleep(500);
-    }
-
-    private static void TestServerConnection(IConfig config)
-    {
-        string testUrl = $"http://{config["host"]}:{config["port"]}/";
-        TestClient.TestServerConnection(testUrl);
     }
 
     private static void WaitForUserInput(Server server)

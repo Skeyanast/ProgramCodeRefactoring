@@ -1,7 +1,8 @@
-﻿using System.Net;
+﻿using RPKApp0.Logging;
+using System.Net;
 using System.Text;
 
-namespace RPKApp0;
+namespace RPKApp0.Core;
 
 public class RequestHandler
 {

@@ -1,4 +1,4 @@
-﻿namespace RPKApp0;
+﻿namespace RPKApp0.Logging;
 
 public class ConsoleLogger : Logger
 {
@@ -10,4 +10,6 @@ public class ConsoleLogger : Logger
     {
         Console.WriteLine(_formatter(message));
     }
+
+    protected override string DefaultFormatter(string message) => $"[LOG] {DateTime.UtcNow:O}: {message}";
 }
