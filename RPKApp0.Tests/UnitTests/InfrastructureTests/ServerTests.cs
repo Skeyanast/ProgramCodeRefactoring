@@ -25,12 +25,14 @@ public class ServerTests
     {
         Server server = CreateTestServer();
 
+
         Exception exception = Record.Exception(() =>
         {
             System.Reflection.MethodInfo? method = typeof(Server).GetMethod("InitializeListener",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             method?.Invoke(server, null);
         });
+
 
         Assert.Null(exception);
 
@@ -42,7 +44,9 @@ public class ServerTests
     {
         Server server = CreateTestServer();
 
+
         Assert.NotNull(server);
+
 
         server.Stop();
     }
@@ -51,6 +55,7 @@ public class ServerTests
     public void Stop_MultipleCalls_ShouldNotThrow()
     {
         Server server = CreateTestServer();
+
 
         server.Stop();
         Assert.Throws<ObjectDisposedException>(server.Stop);

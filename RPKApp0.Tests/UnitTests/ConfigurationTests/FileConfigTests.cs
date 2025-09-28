@@ -38,7 +38,9 @@ public class FileConfigTests : IDisposable
         string configJson = """{"port": 8080, "host": "localhost"}""";
         string configFile = CreateTempConfigFile(configJson);
 
+
         FileConfig config = new(configFile);
+
 
         bool portParsed = int.TryParse(config["Port"].ToString(), out int configPort);
         Assert.True(portParsed);
@@ -53,7 +55,9 @@ public class FileConfigTests : IDisposable
         File.WriteAllText("appsettings.json", configJson);
         _tempFiles.Add("appsettings.json");
 
+
         FileConfig config = new();
+
 
         Assert.Equal("testValue", config["TestKey"].ToString());
     }
@@ -62,6 +66,7 @@ public class FileConfigTests : IDisposable
     public void Constructor_FileNotFound_ShouldThrowFileNotFoundException()
     {
         string nonExistentFile = "nonexistent.json";
+
 
         FileNotFoundException exception = Assert.Throws<FileNotFoundException>(() => new FileConfig(nonExistentFile));
         Assert.Contains(nonExistentFile, exception.Message);
@@ -74,6 +79,7 @@ public class FileConfigTests : IDisposable
         string invalidJson = "{ invalid json }";
         string configFile = CreateTempConfigFile(invalidJson);
 
+
         InvalidOperationException exception = Assert.Throws<InvalidOperationException>(() => new FileConfig(configFile));
         Assert.Contains("Failed to load configuration", exception.Message);
     }
@@ -84,6 +90,7 @@ public class FileConfigTests : IDisposable
         string configJson = """{"port": 8080, "host": "localhost"}""";
         string configFile = CreateTempConfigFile(configJson);
         FileConfig config = new(configFile);
+
 
         bool portParsed = int.TryParse(config["Port"].ToString(), out int configPort);
         Assert.True(portParsed);
@@ -113,6 +120,7 @@ public class FileConfigTests : IDisposable
         string configFile = CreateTempConfigFile(configJson);
         FileConfig config = new(configFile);
 
+
         Assert.Throws<ArgumentException>(() => config[invalidKey]);
     }
 
@@ -126,9 +134,11 @@ public class FileConfigTests : IDisposable
         string configFile = CreateTempConfigFile(configJson);
         FileConfig config = new(configFile);
 
+
         bool portParsed = int.TryParse(config[portKey].ToString(), out int configPort);
         Assert.True(portParsed);
         Assert.Equal(8080, configPort);
+
 
         Assert.Equal("localhost", config[hostKey].ToString());
     }
@@ -139,7 +149,9 @@ public class FileConfigTests : IDisposable
         string configJson = "{}";
         string configFile = CreateTempConfigFile(configJson);
 
+
         FileConfig config = new(configFile);
+
 
         Assert.Throws<KeyNotFoundException>(() => config["AnyKey"]);
     }

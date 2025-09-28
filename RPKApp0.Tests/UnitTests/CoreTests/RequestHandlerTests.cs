@@ -20,6 +20,7 @@ public class SimpleRequestHandlerTests
     {
         RequestHandler handler = new RequestHandler(_logger.Object);
 
+
         Assert.NotNull(handler);
     }
 
