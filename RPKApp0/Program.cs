@@ -9,11 +9,11 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        //IConfig config = new ObjectConfig() { Host = "localhost", Port = 8080 };
-        IConfig config = new FileConfig("jsconfig1.json");
+        IConfig config = new ObjectConfig() { Host = "localhost", Port = 8080 };
+        //IConfig config = new FileConfig("jsconfig1.json");
 
-        //Logger logger = new ConsoleLogger(message => $"[log]: {message}");
-        Logger logger = new FileLogger("app.log", message => $"[log]: {message}\n");
+        Logger logger = new ConsoleLogger(message => $"[log]: {message}");
+        //Logger logger = new FileLogger("app.log", message => $"[log]: {message}\n");
 
         Server server = new(config, logger);
 
