@@ -11,8 +11,17 @@ public class FileConfig : IConfig
     {
         get
         {
-            if (_configData.TryGetValue(key, out var value))
+            if (!IsKeyValid(key))
+            {
+                throw new ArgumentException($"Invalid key");
+            }
+
+            string formattedKey = KeyFormat(key);
+
+            if (_configData.TryGetValue(formattedKey, out var value))
+            {
                 return value;
+            }
 
             throw new KeyNotFoundException($"Configuration key '{key}' not found");
         }
@@ -24,32 +33,6 @@ public class FileConfig : IConfig
         _configData = LoadConfig();
     }
 
-    public T GetValue<T>(string key, T defaultValue = default)
-    {
-        if (_configData.TryGetValue(key, out var value))
-        {
-            try
-            {
-                return (T)Convert.ChangeType(value, typeof(T));
-            }
-            catch
-            {
-                return defaultValue;
-            }
-        }
-        return defaultValue;
-    }
-
-    public void Reload()
-    {
-        _configData.Clear();
-        var newData = LoadConfig();
-        foreach (var item in newData)
-        {
-            _configData[item.Key] = item.Value;
-        }
-    }
-
     private Dictionary<string, object> LoadConfig()
     {
         if (!File.Exists(_configFilePath))
@@ -59,19 +42,28 @@ public class FileConfig : IConfig
 
         try
         {
-            var json = File.ReadAllText(_configFilePath);
-            var options = new JsonSerializerOptions
+            string json = File.ReadAllText(_configFilePath);
+            JsonSerializerOptions options = new()
             {
                 PropertyNameCaseInsensitive = true,
                 ReadCommentHandling = JsonCommentHandling.Skip
             };
 
-            return JsonSerializer.Deserialize<Dictionary<string, object>>(json, options)
-                ?? new Dictionary<string, object>();
+            return JsonSerializer.Deserialize<Dictionary<string, object>>(json, options) ?? [];
         }
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Failed to load configuration: {ex.Message}", ex);
         }
+    }
+
+    private static bool IsKeyValid(string key)
+    {
+        return key != null && !string.IsNullOrWhiteSpace(key);
+    }
+
+    private static string KeyFormat(string key)
+    {
+        return key.ToLower();
     }
 }

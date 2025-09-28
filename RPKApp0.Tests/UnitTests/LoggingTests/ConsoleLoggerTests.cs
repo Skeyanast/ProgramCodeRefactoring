@@ -2,7 +2,7 @@
 
 namespace RPKApp0.Tests.UnitTests.LoggingTests;
 
-public class ConsoleLoggerTests
+public class ConsoleLoggerTests : IDisposable
 {
     private readonly StringWriter _consoleOutput;
     private readonly TextWriter _originalConsoleOut;

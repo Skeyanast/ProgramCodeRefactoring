@@ -10,14 +10,18 @@ public class ObjectConfig : IConfig
     {
         get
         {
-            PropertyInfo? property = GetType().GetProperty(key, _flags);
-
-            if (property != null)
+            if (IsKeyValid(key))
             {
-                return property.GetValue(this) ?? "";
-            }
+                PropertyInfo? property = GetType().GetProperty(key, _flags);
 
-            throw new ArgumentException($"Field or property '{key}' not found");
+                if (property != null)
+                {
+                    return property.GetValue(this) ?? "";
+                }
+
+                throw new ArgumentException($"Field or property '{key}' not found");
+            }
+            throw new ArgumentException($"Invalid key");
         }
     }
 
@@ -26,23 +30,8 @@ public class ObjectConfig : IConfig
 
     public ObjectConfig() { }
 
-    public IEnumerable<string> GetAllNames()
+    private static bool IsKeyValid(string key)
     {
-        IEnumerable<string> properties = GetType().GetProperties(_flags)
-            .Select(f => f.Name);
-
-        return properties;
-    }
-
-    public Dictionary<string, object> GetAllValues()
-    {
-        Dictionary<string, object> result = new(StringComparer.OrdinalIgnoreCase);
-
-        foreach (PropertyInfo? property in GetType().GetProperties(_flags))
-        {
-            result[property.Name] = property.GetValue(this) ?? "";
-        }
-
-        return result;
+        return key != null && !string.IsNullOrWhiteSpace(key);
     }
 }
