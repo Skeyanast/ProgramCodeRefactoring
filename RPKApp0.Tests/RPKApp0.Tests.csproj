@@ -28,8 +28,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\RPKApp0\RPKApp0.csproj" />
-  </ItemGroup>
-
 </Project>
