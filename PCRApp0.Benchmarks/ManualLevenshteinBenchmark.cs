@@ -3,20 +3,53 @@ namespace PCRApp0;
 
 internal class ManualLevenshteinBenchmark
 {
-    public static void RunBenchmarks(int iterations)
+    public static void RunBenchmarks(int iterations, int stringRepeatCount)
     {
-        Console.WriteLine("=== Levenshtein Distance Manual Benchmark ===\n");
+        Func<string, string> stringFormatter = (str) => string.Concat(Enumerable.Repeat(str, stringRepeatCount));
 
+        Console.WriteLine("=== Levenshtein Distance Manual Benchmark ===\n");
         var testCases = new[]
         {
-            new { s1 = "cat", s2 = "cut", description = "Length 3 strings" },
-            new { s1 = "haven", s2 = "fever", description = "Length 5 strings" },
-            new { s1 = "kittens", s2 = "sitting", description = "Length 7 strings" },
-            new { s1 = "microsoft", s2 = "bloomberg", description = "Length 9 strings" },
-            new { s1 = "calculator", s2 = "applicator", description = "Length 10 strings" },
-            new { s1 = "programming", s2 = "refactoring", description = "Length 11 strings" },
-            new { s1 = "", s2 = "test", description = "Empty first string" },
-            new { s1 = "test", s2 = "", description = "Empty second string" }
+            new {
+                s1 = stringFormatter("cat"),
+                s2 = stringFormatter("cut"),
+                description = $"Length {3 * stringRepeatCount} strings"
+            },
+            new {
+                s1 = stringFormatter("haven"),
+                s2 = stringFormatter("fever"),
+                description = $"Length {5 * stringRepeatCount} strings"
+            },
+            new {
+                s1 = stringFormatter("kittens"),
+                s2 = stringFormatter("sitting"),
+                description = $"Length {7 * stringRepeatCount} strings"
+            },
+            new {
+                s1 = stringFormatter("microsoft"),
+                s2 = stringFormatter("bloomberg"),
+                description = $"Length {9 * stringRepeatCount} strings"
+            },
+            new {
+                s1 = stringFormatter("calculator"),
+                s2 = stringFormatter("applicator"),
+                description = $"Length {10 * stringRepeatCount} strings"
+            },
+            new {
+                s1 = stringFormatter("programming"),
+                s2 = stringFormatter("refactoring"),
+                description = $"Length {11 * stringRepeatCount} strings"
+            },
+            new {
+                s1 = "",
+                s2 = stringFormatter("test"),
+                description = "Empty first string"
+            },
+            new {
+                s1 = stringFormatter("test"),
+                s2 = "",
+                description = "Empty second string"
+            }
         };
 
         Stopwatch stopwatch = new();
@@ -24,7 +57,7 @@ internal class ManualLevenshteinBenchmark
         foreach (var testCase in testCases)
         {
             Console.WriteLine($"Test: {testCase.description}");
-            Console.WriteLine($"Strings: '{testCase.s1}' vs '{testCase.s2}'");
+            //Console.WriteLine($"Strings: '{testCase.s1}' vs '{testCase.s2}'");
 
             // pre calculate run 
             LevenshteinCalculator.LevenshteinDistance(testCase.s1, testCase.s2);
