@@ -9,9 +9,12 @@ internal class ManualLevenshteinBenchmark
 
         var testCases = new[]
         {
-            new { s1 = "cat", s2 = "cut", description = "Short strings" },
-            new { s1 = "kitten", s2 = "sitting", description = "Medium strings" },
-            new { s1 = "programming", s2 = "refactoring", description = "Long strings" },
+            new { s1 = "cat", s2 = "cut", description = "Length 3 strings" },
+            new { s1 = "haven", s2 = "fever", description = "Length 5 strings" },
+            new { s1 = "kittens", s2 = "sitting", description = "Length 7 strings" },
+            new { s1 = "microsoft", s2 = "bloomberg", description = "Length 9 strings" },
+            new { s1 = "calculator", s2 = "applicator", description = "Length 10 strings" },
+            new { s1 = "programming", s2 = "refactoring", description = "Length 11 strings" },
             new { s1 = "", s2 = "test", description = "Empty first string" },
             new { s1 = "test", s2 = "", description = "Empty second string" }
         };
