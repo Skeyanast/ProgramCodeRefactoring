@@ -1,26 +1,101 @@
 services:
+  # API Gateway
   api_gateway:
-    build: api_gateway
+    build: ./api_gateway
     ports:
       - "8000:8000"
     environment:
       - NODE_ENV=production
+    depends_on:
+      - service_users
+      - service_orders
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # Users Microservicd
   service_users:
-    build: service_users
+    build: ./service_users
     environment:
       - NODE_ENV=production
+      - DATABASE_URL=postgresql://user:password@db_users:5432/users_db
+      - REDIS_HOST=cache
+    depends_on:
+      db_users:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
+  # Orders Microservice
   service_orders:
-    build: service_orders
+    build: ./service_orders
     environment:
       - NODE_ENV=production
+      - DATABASE_URL=postgresql://user:password@db_orders:5432/orders_db
+      - REDIS_HOST=cache
+      - USERS_SERVICE_URL=http://service_users:8000
+    depends_on:
+      db_orders:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+      service_users:
+        condition: service_healthy
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Orders Database
+  db_orders:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: orders_db
+    volumes:
+      - postgres_data_orders:/var/lib/postgresql/data
+      - ./service_orders/migrations/init:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d orders_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  cache:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  postgres_data_users:
+  postgres_data_orders:
+  redis_data:
 
 networks:
   app-network:
