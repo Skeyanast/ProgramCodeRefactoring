@@ -2,10 +2,19 @@
   "name": "service-orders",
   "version": "1.0.0",
   "description": "Orders microservice on Node.js",
-  "main": "index.js",
+  "main": "app/index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node app/index.js",
+    "dev": "nodemon app/index.js",
+    "migrate": "npx sequelize-cli db:migrate",
+    "migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "migrate:reset": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate",
+    "seed": "npx sequelize-cli db:seed:all",
+    "seed:undo": "npx sequelize-cli db:seed:undo:all",
+    "seed:demo": "npx sequelize-cli db:seed --seed 001-demo-orders",
+    "seed:test": "npx sequelize-cli db:seed --seed 002-test-orders",
+    "reset:db": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
+    "health": "curl -f http://localhost:8000/health || exit 1"
   },
   "dependencies": {
     "axios": "^1.13.2",
