@@ -1,0 +1,1180 @@
+{
+	"info": {
+		"_postman_id": "d94b176e-d960-4564-b8fa-bf83a61a7a5e",
+		"name": "Refactoring_Pr3",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34428063"
+	},
+	"item": [
+		{
+			"name": "Health Checks",
+			"item": [
+				{
+					"name": "API Gateway Health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Основные проверки статуса\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Gateway reports running status\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.status).to.eql(\"API Gateway is running\");\r",
+									"});\r",
+									"\r",
+									"// Проверка наличия Circuit Breaker'ов\r",
+									"pm.test(\"Circuit breakers for all services are present\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.circuits).to.be.an('object');\r",
+									"    pm.expect(jsonData.circuits).to.have.property('users');\r",
+									"    pm.expect(jsonData.circuits).to.have.property('orders');\r",
+									"});\r",
+									"\r",
+									"// Проверка структуры статистики\r",
+									"pm.test(\"Circuit breakers have stats structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.circuits.users.stats).to.be.an('object');\r",
+									"    pm.expect(jsonData.circuits.orders.stats).to.be.an('object');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API Gateway Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Быстрая проверка доступности\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Gateway responds with simple status\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.status).to.eql(\"API Gateway is running\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has minimal structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.keys(['status']);\r",
+									"});\r",
+									"\r",
+									"// Проверка времени ответа (должен быть быстрым)\r",
+									"pm.test(\"Response time is fast (simple endpoint)\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(100);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders Services Health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Orders service health check passes through gateway\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+									"    pm.expect(jsonData.service).to.eql(\"Orders Service\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Health response has timestamp\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.property('timestamp');\r",
+									"    pm.expect(jsonData.timestamp).to.match(/\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}/);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has complete health structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.keys(['status', 'service', 'timestamp']);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders Services Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Orders service status check passes\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.status).to.eql(\"Orders service is running\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has minimal status structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.keys(['status']);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Users Service Health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Users service health check passes through gateway\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.status).to.eql(\"OK\");\r",
+									"    pm.expect(jsonData.service).to.eql(\"Users Service\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Health response has proper structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.property('timestamp');\r",
+									"    pm.expect(jsonData).to.have.property('status');\r",
+									"    pm.expect(jsonData).to.have.property('service');\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users Flow",
+			"item": [
+				{
+					"name": "Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Проверка успешного создания\r",
+									"pm.test(\"Status code is 201 Created\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has user structure with ID\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.property('id');\r",
+									"    pm.expect(jsonData).to.have.property('email');\r",
+									"    pm.expect(jsonData).to.have.property('name');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"User data matches request\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    const requestBody = JSON.parse(pm.request.body.raw);\r",
+									"    pm.expect(jsonData.email).to.eql(requestBody.email);\r",
+									"    pm.expect(jsonData.name).to.eql(requestBody.name);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"ID is numeric and positive\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.id).to.be.a('number');\r",
+									"    pm.expect(jsonData.id).to.be.above(0);\r",
+									"});\r",
+									"\r",
+									"// Сохраняем ID для последующих тестов\r",
+									"const userData = pm.response.json();\r",
+									"pm.collectionVariables.set(\"test_user_id\", userData.id);\r",
+									"pm.collectionVariables.set(\"test_user_email\", userData.email);\r",
+									"pm.collectionVariables.set(\"test_user_name\", userData.name);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"test.user@mail.ru\",\r\n    \"name\": \"Test User\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is an array\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an('array');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Array contains created user\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    const createdUser = jsonData.find(user => user.id === pm.collectionVariables.get(\"test_user_id\"));\r",
+									"    pm.expect(createdUser).to.not.be.undefined;\r",
+									"    pm.expect(createdUser.email).to.eql(pm.collectionVariables.get(\"test_user_email\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Each user has required fields\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    jsonData.forEach(user => {\r",
+									"        pm.expect(user).to.have.property('id');\r",
+									"        pm.expect(user).to.have.property('email');\r",
+									"        pm.expect(user).to.have.property('name');\r",
+									"    });\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Retrieved user matches created user\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"test_user_id\"));\r",
+									"    pm.expect(jsonData.email).to.eql(pm.collectionVariables.get(\"test_user_email\"));\r",
+									"    pm.expect(jsonData.name).to.eql(pm.collectionVariables.get(\"test_user_name\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"User has complete data structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.keys(['id', 'email', 'name']);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response time is acceptable\", function () {\r",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{test_user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{test_user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"User data is updated correctly\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    const requestBody = JSON.parse(pm.request.body.raw);\r",
+									"    \r",
+									"    pm.expect(jsonData.email).to.eql(requestBody.email);\r",
+									"    pm.expect(jsonData.name).to.eql(requestBody.name);\r",
+									"    // ID должен остаться прежним\r",
+									"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"test_user_id\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Updated user has consistent structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.keys(['id', 'email', 'name']);\r",
+									"});\r",
+									"\r",
+									"// Обновляем переменные с новыми данными\r",
+									"const updatedUser = pm.response.json();\r",
+									"pm.collectionVariables.set(\"test_user_email\", updatedUser.email);\r",
+									"pm.collectionVariables.set(\"test_user_name\", updatedUser.name);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"updated.user@mail.ru\",\r\n    \"name\": \"Updated Test User\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/{{test_user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{test_user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response confirms deletion\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.message).to.eql(\"User deleted\");\r",
+									"    pm.expect(jsonData).to.have.property('deletedUser');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Deleted user data is returned\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.deletedUser.id).to.eql(pm.collectionVariables.get(\"test_user_id\"));\r",
+									"    pm.expect(jsonData.deletedUser.email).to.eql(pm.collectionVariables.get(\"test_user_email\"));\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{test_user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{test_user_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Non-Existent User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 for non-existent user\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Error message is clear and informative\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.error).to.eql(\"User not found\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Error response has proper structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.keys(['error']);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/9999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"9999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Details",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Создаем пользователя для теста агрегации, если его нет\r",
+									"if (!pm.collectionVariables.get(\"test_user_id\")) {\r",
+									"    const createRequest = {\r",
+									"        url: pm.collectionVariables.get(\"base_url\") + '/users',\r",
+									"        method: 'POST',\r",
+									"        header: { 'Content-Type': 'application/json' },\r",
+									"        body: {\r",
+									"            mode: 'raw',\r",
+									"            raw: JSON.stringify({\r",
+									"                email: 'aggregation.test@mail.ru',\r",
+									"                name: 'Aggregation Test User'\r",
+									"            })\r",
+									"        }\r",
+									"    };\r",
+									"    \r",
+									"    pm.sendRequest(createRequest, function (err, response) {\r",
+									"        if (!err) {\r",
+									"            const userData = response.json();\r",
+									"            pm.collectionVariables.set(\"test_user_id\", userData.id);\r",
+									"            pm.collectionVariables.set(\"test_user_email\", userData.email);\r",
+									"            console.log(\"Created user for aggregation test: \" + userData.id);\r",
+									"        }\r",
+									"    });\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has aggregation structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.property('user');\r",
+									"    pm.expect(jsonData).to.have.property('orders');\r",
+									"    pm.expect(Array.isArray(jsonData.orders)).to.be.true;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"User data is complete\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.user).to.have.property('id');\r",
+									"    pm.expect(jsonData.user).to.have.property('email');\r",
+									"    pm.expect(jsonData.user).to.have.property('name');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Orders array is present (may be empty)\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.orders).to.be.an('array');\r",
+									"    console.log(\"User has \" + jsonData.orders.length + \" orders\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{test_user_id}}/details",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{test_user_id}}",
+								"details"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify User Deletion",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 after deletion\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Error message confirms user not found\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.error).to.eql(\"User not found\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Get all users shows empty or reduced list\", function () {\r",
+									"    // Можно добавить проверку, что в списке пользователей нет удаленного\r",
+									"    console.log(\"✅ User deletion verified - 404 returned\");\r",
+									"});\r",
+									"\r",
+									"// Очищаем переменные\r",
+									"pm.collectionVariables.unset(\"test_user_id\");\r",
+									"pm.collectionVariables.unset(\"test_user_email\");\r",
+									"pm.collectionVariables.unset(\"test_user_name\");"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/{{test_user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"{{test_user_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Orders Flow",
+			"item": [
+				{
+					"name": "Create Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Order has correct structure\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('id');",
+									"    pm.expect(jsonData).to.have.property('user_id');",
+									"    pm.expect(jsonData).to.have.property('product');",
+									"});",
+									"",
+									"pm.test(\"Order data matches request\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const requestBody = JSON.parse(pm.request.body.raw);",
+									"    pm.expect(jsonData.user_id.toString()).to.eql(requestBody.user_id);",
+									"    pm.expect(jsonData.product).to.eql(requestBody.product);",
+									"});",
+									"",
+									"pm.test(\"Order ID is numeric and positive\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.a('number');",
+									"    pm.expect(jsonData.id).to.be.above(0);",
+									"});",
+									"",
+									"// Сохраняем данные заказа",
+									"const orderData = pm.response.json();",
+									"pm.collectionVariables.set(\"test_order_id\", orderData.id);",
+									"pm.collectionVariables.set(\"test_order_product\", orderData.product);",
+									"pm.collectionVariables.set(\"test_order_userId\", orderData.user_id);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\": \"{{test_user_id}}\",\r\n    \"product\": \"Sample Product\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All orders",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response is an array\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an('array');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Array contains created order\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    const createdOrder = jsonData.find(order => order.id === pm.collectionVariables.get(\"test_order_id\"));\r",
+									"    pm.expect(createdOrder).to.not.be.undefined;\r",
+									"    pm.expect(createdOrder.product).to.eql(pm.collectionVariables.get(\"test_order_product\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Each order has required fields\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    jsonData.forEach(order => {\r",
+									"        pm.expect(order).to.have.property('id');\r",
+									"        pm.expect(order).to.have.property('user_id');\r",
+									"        pm.expect(order).to.have.property('product');\r",
+									"    });\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order by ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Retrieved order matches created order\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"test_order_id\"));\r",
+									"    pm.expect(jsonData.product).to.eql(pm.collectionVariables.get(\"test_order_product\"));\r",
+									"    pm.expect(jsonData.userId).to.eql(pm.collectionVariables.get(\"test_order_user_id\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Order has complete data structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.keys(['id', 'user_id', 'product']);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/{{test_order_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{test_order_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Order data is updated correctly\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    const requestBody = JSON.parse(pm.request.body.raw);\r",
+									"    \r",
+									"    pm.expect(jsonData.product).to.eql(requestBody.product);\r",
+									"    pm.expect(jsonData.user_id.toString()).to.eql(requestBody.user_id);\r",
+									"    // ID должен остаться прежним\r",
+									"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"test_order_id\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Updated order has consistent structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.keys(['id', 'user_id', 'product']);\r",
+									"});\r",
+									"\r",
+									"// Обновляем переменные с новыми данными\r",
+									"const updatedOrder = pm.response.json();\r",
+									"pm.collectionVariables.set(\"test_order_product\", updatedOrder.product);"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"user_id\": \"{{test_user_id}}\",\r\n    \"product\": \"Updated Product Name\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/orders/{{test_order_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{test_order_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response confirms deletion\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.message).to.eql(\"Order deleted\");\r",
+									"    pm.expect(jsonData).to.have.property('deletedOrder');\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Deleted order data is returned\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.deletedOrder.id).to.eql(pm.collectionVariables.get(\"test_order_id\"));\r",
+									"    pm.expect(jsonData.deletedOrder.product).to.eql(pm.collectionVariables.get(\"test_order_product\"));\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/{{test_order_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{test_order_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Non-Existent Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 for non-existent order\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Error message is clear and informative\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.error).to.eql(\"Order not found\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Error response has proper structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.keys(['error']);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/9999",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"9999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Order Deletion",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 after deletion\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Error message confirms order not found\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.error).to.eql(\"Order not found\");\r",
+									"});\r",
+									"\r",
+									"// Очищаем переменные заказа\r",
+									"pm.collectionVariables.unset(\"test_order_id\");\r",
+									"pm.collectionVariables.unset(\"test_order_product\");\r",
+									"pm.collectionVariables.unset(\"test_order_userId\");"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/{{test_order_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"{{test_order_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Orders Status Endpoint",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Orders status endpoint works\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.status).to.eql(\"Orders service is running\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response has minimal structure\", function () {\r",
+									"    const jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.keys(['status']);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/orders/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"orders",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"requests": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": ""
+		},
+		{
+			"key": "base_health",
+			"value": ""
+		},
+		{
+			"key": "initial_circuit_status",
+			"value": ""
+		},
+		{
+			"key": "agg_user_id",
+			"value": ""
+		},
+		{
+			"key": "agg_user_email",
+			"value": ""
+		},
+		{
+			"key": "initial_users_status",
+			"value": ""
+		},
+		{
+			"key": "initial_orders_status",
+			"value": ""
+		}
+	]
+}
